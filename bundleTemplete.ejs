@@ -1,0 +1,26 @@
+// 如何将esm转换成cjs的语法
+;(function(modules) {
+  function require(id) {
+    const module = {
+      exports: {}
+    }
+
+    const [fn, mapping] = modules[id]
+    function localRequire(path) {
+      const id = mapping[path]
+      return require(id)
+    }
+    fn(localRequire, modules, module.exports)
+
+    return module.exports
+  }
+  require(1)
+})({
+  <% Object.keys(modules).forEach(key => { %>
+    "<%= key %>": [function (require, modules, exports) { %>
+      <%- modules[key][0] %>
+    }, <%- JSON.stringify(modules[key][1]) %>],
+  <% }) %>
+})
+
+// %- 防止转义
